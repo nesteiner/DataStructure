@@ -1,0 +1,22 @@
+#+title: 数据结构需求设计
+
+* DONE List.jl 基础接口
+** add
+1. =push!(list, data)=
+2. =push_next!(list, iter, data)=
+** delete
+1. =pop!(list)=
+2. =popat!(list, iter)=
+** modify
+# 1. =replace!(list, iter, data)=
+2. =replace!(iter, data)=
+** query
+1. =findfirst(function, list)=
+   this function need override =keys= and =iterate(listnode)=
+2. =iterate(list)=
+
+** Property   
+1. =first(list)=
+2. =last(list)=
+3. =isempty(list)=
+4. =length(list)=
