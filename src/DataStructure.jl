@@ -1,10 +1,11 @@
 module DataStructure
 
 include("List.jl")
-export List
-export push!, pop!, insert_data_next_1!, insert_data_next_2!, remove_next!,
+export BaseList
+export push!, pop!, remove_next!,
   show, keys,
-  push_next!, popat!, replace!, first, last, isempty, length, filter
+  push_next!, popat!, replace!, first, last, isempty, length, filter,
+  createSingleList, createDoubleList
 # export push!, show, iterate, isempty, length, first, last,
 #   show,
 #   replace!,

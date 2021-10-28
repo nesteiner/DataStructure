@@ -1,7 +1,7 @@
 using DataStructure, Test
 
 @testset "test single list" begin
-  list = List(Int)
+  list = createSingleList(Int)
   for i in 1:10
     push!(list, i)
   end
@@ -38,7 +38,7 @@ using DataStructure, Test
 end
 
 @testset "test double list" begin
-  list = List(Int, insert_data_next_2!)
+  list = createDoubleList(Int)
   @testset "push element into list" begin
     for i in 1:10
       push!(list, i)

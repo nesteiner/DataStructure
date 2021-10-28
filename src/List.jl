@@ -6,14 +6,17 @@ import Base: push!, popat!, pop!,
 
 include("ListNode.jl")
 
-mutable struct List{T}
+createSingleList(T::DataType) = BaseList(T)
+createDoubleList(T::DataType) = BaseList(T, insert_data_next_2!)
+
+mutable struct BaseList{T}
   dummy::DummyNode
   current::ListNode
   length::Int
 
   insert_fn::Function
   
-  List(E::DataType) = begin
+  BaseList(E::DataType) = begin
     list = new{E}()
     list.current = list.dummy = DummyNode(E)
     list.length = 0
@@ -23,17 +26,17 @@ mutable struct List{T}
     return list
   end
 
-  List(E::DataType, insert_fn::Function) = begin
-    list = List(E)
+  BaseList(E::DataType, insert_fn::Function) = begin
+    list = BaseList(E)
     list.insert_fn = insert_fn
 
     return list
   end
 end
 
-keys(list::List) = next(list.dummy)
+keys(list::BaseList) = next(list.dummy)
 
-function push!(list::List{T}, data::T) where T
+function push!(list::BaseList{T}, data::T) where T
   list.length += 1
   list.insert_fn(list.current, data)
   
@@ -42,7 +45,7 @@ end
 
 # ATTENTION to test push_next!, you should override the `findfirst` first.
 
-function push_next!(list::List{T}, node::ListCons, data::T) where T
+function push_next!(list::BaseList{T}, node::ListCons, data::T) where T
   list.length += 1
   unlink = next(node)
   list.insert_fn(node, data)
@@ -52,14 +55,14 @@ function push_next!(list::List{T}, node::ListCons, data::T) where T
   insert_next!(newnode, unlink)
 end
 
-function pop!(list::List) 
+function pop!(list::BaseList) 
   list.length -= 1
   prevnode = prev(list.current, list.dummy)
   remove_next!(prevnode)
   list.current = prevnode
 end
 
-function popat!(list::List, iter::ListNext)
+function popat!(list::BaseList, iter::ListNext)
   list.length -= 1
   prevnode = prev(iter, list.dummy)
   unlinknode = next(iter)
@@ -69,7 +72,7 @@ end
 
 replace!(node::ListCons, data::T) where T = node.data = data
 
-function iterate(list::List)
+function iterate(list::BaseList)
   firstnode = next(list.dummy)
   if isa(firstnode, NilNode)
     return nothing
@@ -78,7 +81,7 @@ function iterate(list::List)
   end
 end
 
-function iterate(::List, state::ListNode)
+function iterate(::BaseList, state::ListNode)
   if isa(state, NilNode)
     return nothing
   else
@@ -86,7 +89,7 @@ function iterate(::List, state::ListNode)
   end
 end
 
-first(list::List) = begin
+first(list::BaseList) = begin
   firstnode = next(list.dummy)
   if isa(firstnode, NilNode)
     @error "there is no data in list"
@@ -95,7 +98,7 @@ first(list::List) = begin
   end
 end
 
-last(list::List) = begin
+last(list::BaseList) = begin
   lastnode = list.current
   if isa(lastnode, NilNode)
     @error "there is no data in list"
@@ -104,18 +107,18 @@ last(list::List) = begin
   end
 end
 
-isempty(list::List) = list.length == 0
-length(list::List) = list.length
+isempty(list::BaseList) = list.length == 0
+length(list::BaseList) = list.length
 
-function show(io::IO, list::List)
+function show(io::IO, list::BaseList)
   print(io, "list: ")
   for value in list
     print(io, value, ' ')
   end
 end
 
-function filter(testf::Function, list::List{T}) where T
-  result = List{T}()
+function filter(testf::Function, list::BaseList{T}) where T
+  result = BaseList{T}()
 
   for data in list
     if testf(data)

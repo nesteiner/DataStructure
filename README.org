@@ -1,22 +1,65 @@
 #+title: 数据结构需求设计
+#+export_file_name: README.md
+* =List.jl=
+** 链表节点类型
+*** 类型说明
+1. =ListNode=
+   抽象类型，表示所有链表节点的父类
+2. =ListNext=
+   继承自 =ListNode= 抽象类型，表示有 =next= 字段的 =ListNode= 节点
+3. =ListCons=
+   继承自 =ListNext= 抽象类型，表示有 =data= 字段的 =ListNext= 节点
+*** 类型扩展
+1. =ListNode= 分发 =NilNode= 表示空节点
+   #+begin_src julia
+     mutable struct NilNode{T} <: ListNode end
+   #+end_src
+2. =ListNext= 分发 =DummyNode= 表示哑节点
+   #+begin_src julia
+     mutable struct DummyNode{T} <: ListNext
+       next::ListNode
+       DummyNode(E::DataType)  = new{E}(NilNode{E}())
+     end
+   #+end_src
+3. =ListCons= 分发 =ConsNode= 表示单链表节点，分发 =ConsDouble= 表示双链表节点
+   #+begin_src julia
+     mutable struct ConsNode{T} <: ListCons 
+       data::T
+       next::ListNode
+  
+       ConsNode(data::T) where T = new{T}(data, NilNode{T}())
+     end
 
-* DONE List.jl 基础接口
-** add
-1. =push!(list, data)=
-2. =push_next!(list, iter, data)=
-** delete
-1. =pop!(list)=
-2. =popat!(list, iter)=
-** modify
-# 1. =replace!(list, iter, data)=
-2. =replace!(iter, data)=
-** query
-1. =findfirst(function, list)=
-   this function need override =keys= and =iterate(listnode)=
-2. =iterate(list)=
 
-** Property   
-1. =first(list)=
-2. =last(list)=
-3. =isempty(list)=
-4. =length(list)=
+     mutable struct ConsDouble{T} <: ListCons
+       data::T
+       next::ListNode
+       prev::ListNode
+  
+       ConsDouble(data::T) where T = new{T}(data, NilNode{T}(), NilNode{T}())
+     end
+
+   #+end_src
+
+** 链表操作
+*** 链表构造
+- 单链表 =createSingleList(T)=
+- 双链表 =createDoubleList(T)=
+*** 添加数据
+- =push!(list, data)=
+- =push_next!(list, iter, data)=
+*** 删除数据
+- =pop!(list)=
+- =popat!(list, iter)=
+*** 修改数据
+- =replace!(iter, data)=
+*** 查找节点
+- =findfirst(testf, list)= 以及其他 =find= 系列函数
+- =filter(testf, list)=
+*** 链表属性
+- =first(list)=
+- =last(list)=
+- =isempty(list)=
+- =length(list)=
+*** 链表遍历
+=iterate(list)=
