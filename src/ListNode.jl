@@ -55,9 +55,8 @@ end
 
 # next
 next(node::ListNext) = node.next
-prev(node::ConsDouble, ::ListNode, ::ListNode) = node.prev
-
-prev(node::ConsNode, startnode::ListNext, endnode::ListNode) = begin
+prev(node::ConsDouble, ::ListNode) = node.prev
+prev(node::ConsNode, startnode::ListNext) = begin
   cursor = next(startnode)
   prev = startnode
 

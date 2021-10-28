@@ -4,7 +4,7 @@ include("List.jl")
 export List
 export push!, pop!, insert_data_next_1!, insert_data_next_2!, remove_next!,
   show, keys,
-  push_next!, popat!, replace!, first, last, isempty, length
+  push_next!, popat!, replace!, first, last, isempty, length, filter
 # export push!, show, iterate, isempty, length, first, last,
 #   show,
 #   replace!,

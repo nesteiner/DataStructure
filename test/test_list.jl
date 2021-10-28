@@ -38,7 +38,7 @@ using DataStructure, Test
 end
 
 @testset "test double list" begin
-  list = List(Int, insert_data_next_2!, remove_next!)
+  list = List(Int, insert_data_next_2!)
   @testset "push element into list" begin
     for i in 1:10
       push!(list, i)
