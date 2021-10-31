@@ -1,17 +1,17 @@
 
 # Table of Contents
 
-1.  [`List.jl`](#org414b802)
-    1.  [链表节点类型](#orge5826c4)
-        1.  [类型说明](#org2f208df)
-        2.  [类型扩展](#orgb9233dc)
-    2.  [链表操作](#org47d1d49)
-        1.  [接口](#org03958bf)
-        2.  [测试案例](#orgbfe60ee)
+1.  [`List.jl`](#org321524f)
+    1.  [链表节点类型](#orgcb78ac9)
+        1.  [类型说明](#org2501d60)
+        2.  [类型扩展](#org3925447)
+    2.  [链表操作](#org17c5620)
+        1.  [接口](#org06c470d)
+        2.  [测试案例](#orgf4cbabb)
 
 
 
-<a id="org414b802"></a>
+<a id="org321524f"></a>
 
 # `List.jl`
 
@@ -27,12 +27,12 @@
 这里试了一下用 `Julia` 写一遍，用 **抽象类型分派** 来模拟 `Rust` 中的 `enum`  
 
 
-<a id="orge5826c4"></a>
+<a id="orgcb78ac9"></a>
 
 ## 链表节点类型
 
 
-<a id="org2f208df"></a>
+<a id="org2501d60"></a>
 
 ### 类型说明
 
@@ -44,7 +44,7 @@
     继承自 `ListNext` 抽象类型，表示有 `data` 字段的 `ListNext` 节点
 
 
-<a id="orgb9233dc"></a>
+<a id="org3925447"></a>
 
 ### 类型扩展
 
@@ -76,12 +76,12 @@
         end
 
 
-<a id="org47d1d49"></a>
+<a id="org17c5620"></a>
 
 ## 链表操作
 
 
-<a id="org03958bf"></a>
+<a id="org06c470d"></a>
 
 ### 接口
 
@@ -134,17 +134,18 @@
 9.  TODO 切面
 
 
-<a id="orgbfe60ee"></a>
+<a id="orgf4cbabb"></a>
 
 ### 测试案例
 
 -   `push!`
-
-    list = createSingleList(Int)
-    # or list = createDoubleList(Int)
-    for i in 1:10
-      push!(list, i)
-    end
+	```julia
+	list = createSingleList(Int)
+	# or list = createDoubleList(Int)
+	for i in 1:10
+	push!(list, i)
+	end
+	```
 
 -   `push_next!`  
     
