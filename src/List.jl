@@ -43,15 +43,11 @@ function push!(list::BaseList{T}, data::T) where T
   list.current = next(list.current)
 end
 
-# ATTENTION to test push_next!, you should override the `findfirst` first.
-
 function push_next!(list::BaseList{T}, node::ListCons, data::T) where T
   list.length += 1
   unlink = next(node)
   list.insert_fn(node, data)
   newnode = next(node)
-  # FIXME here, I need to insert node
-  # list.insert_fn(newnode, unlink)
   insert_next!(newnode, unlink)
 end
 
@@ -118,7 +114,7 @@ function show(io::IO, list::BaseList)
 end
 
 function filter(testf::Function, list::BaseList{T}) where T
-  result = BaseList{T}()
+  result = BaseList(T, list.insert_fn)
 
   for data in list
     if testf(data)
