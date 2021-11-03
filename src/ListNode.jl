@@ -16,6 +16,7 @@ mutable struct ConsNode{T} <: ListCons
   next::ListNode
   
   ConsNode(data::T) where T = new{T}(data, NilNode{T}())
+  ConsNode{T}(data::T) where T = ConsNode(data)
 end
 
 
@@ -25,6 +26,7 @@ mutable struct ConsDouble{T} <: ListCons
   prev::ListNode
   
   ConsDouble(data::T) where T = new{T}(data, NilNode{T}(), NilNode{T}())
+  ConsDouble{T}(data::T) where T = ConsDouble(data)
 end
 
 # insert
@@ -35,15 +37,15 @@ insert_next!(node::ListNext, nextnode::ConsDouble) = begin
   nextnode.prev = node
 end
 
-function insert_data_next_1!(node::ListNext, data::T) where T 
-  newnode = ConsNode(data)
-  insert_next!(node, newnode)
-end
+# function insert_data_next_1!(node::ListNext, data::T) where T 
+#   newnode = ConsNode(data)
+#   insert_next!(node, newnode)
+# end
 
-function insert_data_next_2!(node::ListNext, data::T) where T
-  newnode = ConsDouble(data)
-  insert_next!(node, newnode)
-end
+# function insert_data_next_2!(node::ListNext, data::T) where T
+#   newnode = ConsDouble(data)
+#   insert_next!(node, newnode)
+# end
 
 # remove next
 remove_next!(node::ListNext) = begin

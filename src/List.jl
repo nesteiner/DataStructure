@@ -1,126 +1,31 @@
-import Base: push!, popat!, pop!,
-  show, iterate,
-  isempty, length,
-  first, last,
-  replace!, filter, keys
-
 include("ListNode.jl")
+include("BaseList.jl")
 
-createSingleList(T::DataType) = BaseList(T)
-createDoubleList(T::DataType) = BaseList(T, insert_data_next_2!)
+createList(T::DataType; nodetype = ConsNode) = BaseList(T, nodetype{T}, _push_back!, _pop_back!)
+createQueue(T::DataType; nodetype = ConsNode) = BaseList(T, nodetype{T}, _push_back!, _pop_front!)
+createStack(T::DataType; nodetype = ConsNode) = BaseList(T, nodetype{T}, _push_front!, _pop_front!)
 
-mutable struct BaseList{T}
-  dummy::DummyNode
-  current::ListNode
-  length::Int
 
-  insert_fn::Function
-  
-  BaseList(E::DataType) = begin
-    list = new{E}()
-    list.current = list.dummy = DummyNode(E)
-    list.length = 0
-    
-    list.insert_fn = insert_data_next_1!
-    
-    return list
-  end
-
-  BaseList(E::DataType, insert_fn::Function) = begin
-    list = BaseList(E)
-    list.insert_fn = insert_fn
-
-    return list
-  end
-end
-
-keys(list::BaseList) = next(list.dummy)
-
-function push!(list::BaseList{T}, data::T) where T
-  list.length += 1
-  list.insert_fn(list.current, data)
-  
+function _push_back!(list::BaseList{T}, data::T) where T
+  newnode = list.nodetype(data)
+  insert_next!(list.current, newnode)
   list.current = next(list.current)
 end
 
-function push_next!(list::BaseList{T}, node::ListCons, data::T) where T
-  list.length += 1
-  unlink = next(node)
-  list.insert_fn(node, data)
-  newnode = next(node)
+function _push_front!(list::BaseList{T}, data::T) where T
+  newnode = list.nodetype(data)
+  unlink = next(list.dummy)
   insert_next!(newnode, unlink)
+  insert_next!(list.dummy, newnode)
 end
 
-function pop!(list::BaseList) 
-  list.length -= 1
+function _pop_back!(list::BaseList) 
   prevnode = prev(list.current, list.dummy)
   remove_next!(prevnode)
   list.current = prevnode
 end
 
-function popat!(list::BaseList, iter::ListNext)
-  list.length -= 1
-  prevnode = prev(iter, list.dummy)
-  unlinknode = next(iter)
+function _pop_front!(list::BaseList)
+  prevnode = list.dummy
   remove_next!(prevnode)
-  insert_next!(prevnode, unlinknode)
-end
-
-replace!(node::ListCons, data::T) where T = node.data = data
-
-function iterate(list::BaseList)
-  firstnode = next(list.dummy)
-  if isa(firstnode, NilNode)
-    return nothing
-  else
-    return dataof(firstnode), next(firstnode)
-  end
-end
-
-function iterate(::BaseList, state::ListNode)
-  if isa(state, NilNode)
-    return nothing
-  else
-    return dataof(state), next(state)
-  end
-end
-
-first(list::BaseList) = begin
-  firstnode = next(list.dummy)
-  if isa(firstnode, NilNode)
-    @error "there is no data in list"
-  else
-    return dataof(firstnode)
-  end
-end
-
-last(list::BaseList) = begin
-  lastnode = list.current
-  if isa(lastnode, NilNode)
-    @error "there is no data in list"
-  else
-    return dataof(lastnode)
-  end
-end
-
-isempty(list::BaseList) = list.length == 0
-length(list::BaseList) = list.length
-
-function show(io::IO, list::BaseList)
-  print(io, "list: ")
-  for value in list
-    print(io, value, ' ')
-  end
-end
-
-function filter(testf::Function, list::BaseList{T}) where T
-  result = BaseList(T, list.insert_fn)
-
-  for data in list
-    if testf(data)
-      push!(result, data)
-    end
-  end
-
-  return result
 end

@@ -1,19 +1,10 @@
 module DataStructure
 
 include("List.jl")
-export BaseList
-export push!, pop!, remove_next!,
+export push!, pop!,
   show, keys,
-  push_next!, popat!, replace!, first, last, isempty, length, filter,
-  createSingleList, createDoubleList
-# export push!, show, iterate, isempty, length, first, last,
-#   show,
-#   replace!,
-#   filter,
-#   keys,
-#   # push_next!,
-#   dataof,
-#   popat!, pop!
+  push_next!, popat!, replace!, first, last, isempty, length, filter, top, 
+  createList, createQueue, createStack, ConsNode, ConsDouble
 
 
 include("BinarySearchTree.jl")

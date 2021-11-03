@@ -1,22 +1,23 @@
 using DataStructure, Test
 
+
 @testset "test single list" begin
   list = createSingleList(Int)
   for i in 1:10
     push!(list, i)
   end
-  
+
   @testset "push next" begin
     iter = findfirst(isequal(2), list)
     push_next!(list, iter, 2)
-    
+
     @show list
   end
 
   @testset "pop at" begin
     iter = findfirst(isequal(2), list)
     popat!(list, iter)
-    
+
     @show list
   end
 
@@ -43,12 +44,12 @@ end
     for i in 1:10
       push!(list, i)
     end
-    
+
     for value in list
       @show value
     end
   end
-  
+
   @testset "push next " begin
     iter = findfirst(isequal(2), list)
     push_next!(list, iter, -2)
@@ -56,7 +57,7 @@ end
   @testset "pop at" begin
     iter = findfirst(isequal(2), list)
     popat!(list, iter)
-    
+
     @show list
   end
 

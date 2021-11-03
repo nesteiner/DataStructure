@@ -69,6 +69,144 @@ enum List {
     end
     ```
 
+### 节点方法
+
+-   插入下一个节点 `next`
+    放心，对于单链表节点和双链表节点的插入方法我已经分发好了
+
+    ``` {.julia}
+    insert_next!(node::ListNext, nextnode::ListNode) = node.next = nextnode
+
+    insert_next!(node::ListNext, nextnode::ConsDouble) = begin
+      node.next = nextnode
+      nextnode.prev = node
+    end
+    ```
+
+-   删除下一个节点 `next` 有了上面的 `insert_next!` 对 `nextnode`
+    的分发，删除节点就不用判断节点类型了 当前节点会连接剩下的节点
+
+    ``` {.julia}
+    remove_next!(node::ListNext) = begin
+      targetnode = next(node)
+      unlinknode = next(targetnode)
+
+      insert_next!(node, unlinknode)
+    end
+    ```
+
+-   查找上一个节点 这里也需要对类型进行分发，虽然 `ConsDouble`
+    类型用不到后面的 `ListNode` ，但这么写是为了统一写法
+
+    ``` {.julia}
+    prev(node::ConsDouble, ::ListNode) = node.prev
+    prev(node::ConsNode, startnode::ListNext) = begin
+      cursor = next(startnode)
+      prev = startnode
+
+      # locate
+      while cursor != node 
+        prev = cursor
+        cursor = next(cursor)
+      end
+
+      return prev
+
+    end
+    ```
+
+-   查找下一个节点
+
+    ``` {.julia}
+    next(node::ListNext) = node.next
+    ```
+
+-   获取数据
+
+    ``` {.julia}
+    dataof(node::ListCons) = node.data
+    ```
+
+统一的链表说明
+--------------
+
+这里
+
+-   统一了 单，双链表
+-   统一了 链表，队列，栈
+-   认为 队列，栈都是一种链表
+
+单双链表的不同在于节点，这个通过指定链表内部的 `节点类型` 即可
+链表，队列，栈之间的不同在于 `插入方法` 与 `删除方法`
+由此，抽离其中的异同部分，构造链表和其基本操作方法
+
+### 链表结构
+
+``` {.julia}
+mutable struct BaseList{T}
+  dummy::DummyNode
+  current::ListNode
+  length::Int
+
+  insertfn::Function           # insertfn(list, data)
+  removefn::Function           # removefn(list)
+  nodetype::DataType           # consnode, consdouble
+
+  BaseList(T::DataType, N::DataType, insertfn, removefn) = begin
+    dummy = DummyNode(T)
+    list = new{T}()
+    list.dummy = list.current = dummy
+    list.length = 0
+
+    list.nodetype = N
+    list.insertfn = insertfn
+    list.removefn = removefn
+    return list
+  end
+
+end
+```
+
+### 添加数据
+
+-   在 `push!` 方法中，可以使用 `BaseList` 的 `insertfn`
+    实现不同的插入方式
+
+    ``` {.julia}
+    function push!(list::BaseList{T}, data::T) where T
+      list.length += 1
+      list.insertfn(list, data)
+    end
+    ```
+
+-   在 `push_next!` 方法中，由于抽象类的存在和 `BaseList` 的 `nodetype`
+    ，可以判断插入节点类型
+
+    ``` {.julia}
+    function push_next!(list::BaseList{T}, node::ListCons, data::T) where T
+      list.length += 1
+      unlink = next(node)
+      newnode = list.nodetype(data)
+      insert_next!(node, newnode)
+      insert_next!(newnode, unlink)
+    end
+    ```
+
+### 删除数据
+
+同上，通过 `removefn` 来实现不同的删除方法
+
+``` {.julia}
+function pop!(list::BaseList) 
+  if isempty(list) 
+    @error "the list is empty"
+  else 
+    list.length -= 1
+    list.removefn(list)
+  end
+end
+```
+
 链表操作
 --------
 
@@ -76,8 +214,9 @@ enum List {
 
 1.  链表构造
 
-    -   单链表 `createSingleList(T)`
-    -   双链表 `createDoubleList(T)`
+    -   链表 `createList(T; nodetype)`
+    -   队列 `createQueue(T; nodetype)`
+    -   栈 `createStack(T; nodetype)`
 
 2.  添加数据
 
@@ -87,7 +226,10 @@ enum List {
 
 3.  删除数据
 
-    -   `pop!(list)` 删除链表 `list` 的最后一个节点
+    -   `pop!(list)` 通过调用 `list.removefn` 来删除节点，这个方法可以是
+        -   链表的删除
+        -   队列的删除
+        -   栈的删除
     -   `popat!(list, iter)` 删除链表的 `iter` 节点
 
 4.  修改数据
@@ -99,12 +241,14 @@ enum List {
     -   `findfirst(testf, list)`
         返回第一个符合条件的链表节点，这个节点的值能够匹配 `testf` 其他
         `find` 系列函数也可以参考 `findfirst` 用法
-    -   `filter(testf, list)`
+    -   `filter(testf, list)` 
+		**目前只支持 链表和队列，不要使用栈**
 
 6.  链表属性
 
     -   `first(list)`
-    -   `last(list)`
+    -   `last(list)` 
+		**不支持栈**
     -   `isempty(list)`
     -   `length(list)`
 
@@ -114,17 +258,16 @@ enum List {
 
 8.  基于遍历的操作
 
-    `map(func, list)`
-
-9.  [TODO]{.todo .TODO} 切面
+    `map(func, list)` 
+	**不支持栈**
 
 ### 测试案例
 
 -   `push!`
 
     ``` {.julia}
-    list = createSingleList(Int)
-    # or list = createDoubleList(Int)
+    list = createList(Int)
+    # or list = createList(Int; nodetype = ConsDouble)
     for i in 1:10
       push!(list, i)
     end
