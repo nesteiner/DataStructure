@@ -2,7 +2,7 @@ import Base: push!, popat!, pop!,
   show, iterate,
   isempty, length,
   first, last,
-  replace!, filter, keys
+  replace!, filter, keys, eltype
 
 mutable struct BaseList{T}
   dummy::DummyNode
@@ -59,6 +59,7 @@ end
 
 replace!(node::ListCons, data::T) where T = node.data = data
 
+eltype(::Type{BaseList{T}}) where T = T
 function iterate(list::BaseList)
   firstnode = next(list.dummy)
   if isa(firstnode, NilNode)
@@ -86,7 +87,7 @@ first(list::BaseList) = begin
   end
 end
 
-top(::BaseList) = first
+top = first
 
 last(list::BaseList) = begin
   lastnode = list.current

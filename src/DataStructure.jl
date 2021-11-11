@@ -3,13 +3,16 @@ module DataStructure
 include("List.jl")
 export push!, pop!,
   show, keys,
-  push_next!, popat!, replace!, first, last, isempty, length, filter, top, 
-  createList, createQueue, createStack, ConsNode, ConsDouble
+  push_next!, popat!, replace!, first, last, isempty, length, filter, top, eltype,
+  createList, createQueue, createStack, ConsNode, ConsDouble,
+  copy, ==
 
 
 include("BinarySearchTree.jl")
-export BinarySearchTree
-export push!, show, iterate, data, assign_data!
+export createBSTree, BinarySearchTree, BinaryNode, AbstractBinaryNode
+export insert!, show, iterate, dataof, replace!, filter, keys, popat!,
+  isleaf, left, right, isnil, eltype,
+  bfsiterate, preorder, inorder, postorder, hasleft, hasright
 
 include("Graph.jl")
 export Graph, Vertex

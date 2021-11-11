@@ -1,162 +1,108 @@
-import Base: push!, show, iterate, length, filter, keys
-abstract type AbstractTreeNode end
+import Base: insert!, keys, popat!, length, eltype
+include("BinaryTree.jl")
 
-mutable struct TreeNode <: AbstractTreeNode
-  data::Int
-  left::AbstractTreeNode
-  right::AbstractTreeNode
-end
-
-mutable struct TreeNil <: AbstractTreeNode end
-
-mutable struct BinarySearchTree
-  root::AbstractTreeNode
+mutable struct BinarySearchTree{T} <: AbstractBinaryTree
+  root::AbstractBinaryNode
   compare::Function
   length::Int
 end
 
-TreeNode(data::Int) = TreeNode(data, TreeNil(), TreeNil())
-BinarySearchTree() = BinarySearchTree(TreeNil(), <, 0)
-
-data(node::TreeNode) = node.data
-left(node::TreeNode) = node.left
-right(node::TreeNode) = node.right
-isleaf(node::TreeNode) = isa(left(node), TreeNil) && isa(right(node), TreeNil)
-isnil(node::AbstractTreeNode) = isa(node, TreeNil)
+eltype(::Type{BinarySearchTree{T}}) where T = T
+keys(tree::BinarySearchTree) = tree.root
 length(tree::BinarySearchTree) = tree.length
-assign_data!(node::TreeNode, data::Int) = node.data = data
 
-insert_left!(node::TreeNode, other::AbstractTreeNode) = begin
-  node.left = other
-  return node
-end
+createBSTree(T::DataType, compare::Function = <) = BinarySearchTree{T}(BinaryNil(T), compare, 0)
 
-insert_right!(node::TreeNode, other::AbstractTreeNode) = begin
-  node.right = other
-  return node
-end
-
-function insert_node!(node::AbstractTreeNode, data::Int, compare::Function = <)
-  if isnil(node)
-    return TreeNode(data)
-  else
-
-    if compare(data, node.data)
-      node.left = insert_node!(node.left, data, compare)
-    else
-      node.right = insert_node!(node.right, data, compare)
-    end
-
-  end
-
-  return node
-end
-
-push!(tree::BinarySearchTree, data::Int) = begin
-  tree.root = insert_node!(tree.root, data, tree.compare)
+insert!(tree::BinarySearchTree{T}, data::T) where T = begin
+  tree.root = insert!(tree.root, data, tree.compare)
   tree.length += 1
 end
 
 
-"""
-function findfirst(testf::Function, A)
-    for (i, a) in pairs(A)
-        testf(a) && return i
+# STUB find node
+function _find_node(node::BinaryNode{T}, data::T) where T
+  backfather = node
+  status = 0
+  
+  while !isnil(node)
+    if dataof(node) == data 
+      return backfather, status
+    else
+      backfather = node
+
+      if dataof(node) > data
+        node = left(node)
+        status = -1
+      else
+        node = right(node)
+        status = 1
+      end
     end
-    return nothing
-end
-"""
-keys(tree::BinarySearchTree) = tree.root
-
-iterate(node::TreeNil) = nothing
-function iterate(node::TreeNode)
-  queue = AbstractTreeNode[]
-  push!(queue, node)
-  current = popfirst!(queue)
-
-  if !isnil(current.left)
-    push!(queue, current.left)
-  end
-
-  if !isnil(current.right)
-    push!(queue, current.right)
-  end
-
-  return current, queue
-end
-
-function iterate(node::TreeNode, queue::Vector{AbstractTreeNode})
-  if !isempty(queue)
-    current = popfirst!(queue)
-    if !isnil(current.left)
-      push!(queue, current.left)
-    end
-
-    if !isnil(current.right)
-      push!(queue, current.right)
-    end
-
-    return current, queue
-
-  else
-    return nothing
   end
   
+  return BinaryNil(T)
 end
 
-function iterate(tree::BinarySearchTree)
-  if isnil(tree.root)
-    return nothing
+function _popat!(tree::BinarySearchTree{T}, node::BinaryNode{T}) where T
+  targetnode = node # target for delete
+
+  backfather, status = _find_node(tree.root, node.data) 
+  if isnil(backfather)
+    return backfather
+  end
+  
+  if status == -1
+    targetnode = left(backfather)
+  elseif status == 1
+    targetnode = right(backfather)
+  elseif status == 0
+    targetnode = backfather
+  end
+  
+  # 第一中情况，没有左子树
+  if isnil(left(targetnode))
+    if backfather != targetnode
+      backfather.right = right(targetnode)
+    else
+      tree.root = right(tree.root)
+    end
+    
+    targetnode = BinaryNil(T)
+    return tree.root
+  end
+  
+  # 第二种情况，没有右子树
+  if isnil(right(targetnode))
+    if backfather != targetnode
+      backfather.left = left(targetnode)
+    else
+      tree.root = left(tree.root)
+    end
+    
+    targetnode = BinaryNil(T)
+    return tree.root
+  end
+  
+  # 第三种情况，有左子树和右子树
+  backfather = targetnode
+  nextnode = left(targetnode)
+  while !isnil(right(nextnode)) 
+    backfather = nextnode
+    nextnode = right(nextnode)
+  end
+  
+  targetnode.data = dataof(nextnode)
+  
+  if left(backfather) == nextnode
+    backfather.left = left(nextnode)
   else
-    queue = AbstractTreeNode[]
-    push!(queue, tree.root)
-    current = popfirst!(queue)
-
-    if !isnil(current.left)
-      push!(queue, current.left)
-    end
-
-    if !isnil(current.right)
-      push!(queue, current.right)
-    end
-
-    return data(current), queue
+    backfather.right = right(nextnode)
   end
+  
+  return tree.root
 end
 
-function iterate(tree::BinarySearchTree, queue::Vector{AbstractTreeNode})
-  if !isempty(queue)
-    current = popfirst!(queue)
-    if !isnil(current.left)
-      push!(queue, current.left)
-    end
-
-    if !isnil(current.right)
-      push!(queue, current.right)
-    end
-
-    return data(current), queue
-
-  else
-    return nothing
-  end
-end
-
-function filter(f::Function, tree::BinarySearchTree)
-  result = []
-  for value in tree
-    if f(value)
-      push!(result, value)
-    end
-  end
-
-  return result
-end
-
-function show(io::IO, node::TreeNode)
-  print(io, "treenode: ", data(node))
-end
-
-function show(io::IO, node::TreeNil)
-  print(io, "treenil")
+popat!(tree::BinarySearchTree, node::BinaryNode) = begin
+  tree.length -= 1
+  tree.root = _popat!(tree, node)
 end
